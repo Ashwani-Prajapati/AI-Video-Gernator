@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "tsx src/index.ts",
-    "test": "tsx test/api.test.ts"
+    "start": "node dist/index.js",
+    "test": "tsx test/api.test.ts",
+    "test:api": "tsx test/live-api.test.ts"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",

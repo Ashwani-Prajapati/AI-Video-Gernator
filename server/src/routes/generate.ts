@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db/db.js';
+import { modelRegistry } from '../services/ai/registry.js';
 import { jobQueue } from '../services/jobs/jobQueue.js';
 import { StoryboardGenerator } from '../services/llm/storyboardGenerator.js';
 
@@ -40,14 +41,24 @@ router.post('/start', async (req, res) => {
       visualStyle = 'cinematic-realism',
       cameraMovementDefault = 'tracking-shot',
       motionIntensityDefault = 6,
-      providerId = 'procedural',
-      modelId = 'procedural-cinematic',
+      providerId = 'pollinations',
+      modelId = 'pollinations-video',
       narrationLanguage = 'en',
       scenes: customScenes,
     } = req.body;
 
     if (!prompt && !projectId) {
       return res.status(400).json({ success: false, error: 'Prompt or existing projectId is required' });
+    }
+
+    // Validate provider credentials upfront
+    const adapter = modelRegistry.getAdapter(providerId);
+    const credCheck = adapter.validateCredentials();
+    if (!credCheck.isValid) {
+      return res.status(400).json({
+        success: false,
+        error: credCheck.message || `Provider "${providerId}" is not configured. Please choose a ready provider (such as Pollinations AI or Built-in Engine) or configure API keys in Settings.`,
+      });
     }
 
     let project = projectId ? db.getProjectById(projectId) : null;
@@ -154,6 +165,16 @@ router.post('/image-to-video', async (req, res) => {
 
     if (!imageUrl) {
       return res.status(400).json({ success: false, error: 'Reference image URL is required' });
+    }
+
+    // Validate provider credentials upfront
+    const adapter = modelRegistry.getAdapter(providerId);
+    const credCheck = adapter.validateCredentials();
+    if (!credCheck.isValid) {
+      return res.status(400).json({
+        success: false,
+        error: credCheck.message || `Provider "${providerId}" is not configured.`,
+      });
     }
 
     // Create project for image-to-video

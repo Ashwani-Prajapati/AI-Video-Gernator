@@ -33,6 +33,42 @@ interface DatabaseState {
 
 const DEFAULT_MODELS: ModelCapability[] = [
   {
+    id: 'pollinations-video',
+    name: 'Pollinations AI Video (Free & Unlimited)',
+    providerId: 'pollinations',
+    providerName: 'Pollinations AI',
+    supportsTextToVideo: true,
+    supportsImageToVideo: true,
+    supportsFirstLastFrame: false,
+    supportsReferenceImages: true,
+    supportsNativeAudio: true,
+    maxClipDurationSeconds: 10,
+    supportedAspectRatios: ['16:9', '9:16', '1:1'],
+    supportedResolutions: ['720p', '1080p'],
+    isConfigured: true,
+    isSelfHosted: false,
+    pricingDescription: '$0 Free (No API Key Required)',
+    rateLimitDescription: 'Open AI Video Tier',
+  },
+  {
+    id: 'procedural-cinematic',
+    name: 'VividFlow Built-in Procedural Engine (Immediate Playable)',
+    providerId: 'procedural',
+    providerName: 'VividFlow Engine',
+    supportsTextToVideo: true,
+    supportsImageToVideo: true,
+    supportsFirstLastFrame: true,
+    supportsReferenceImages: true,
+    supportsNativeAudio: true,
+    maxClipDurationSeconds: 10,
+    supportedAspectRatios: ['16:9', '9:16', '1:1', '21:9'],
+    supportedResolutions: ['720p', '1080p'],
+    isConfigured: true,
+    isSelfHosted: true,
+    pricingDescription: 'Free & Local (Zero API keys required)',
+    rateLimitDescription: 'Instant generation & assembly',
+  },
+  {
     id: 'veo-2',
     name: 'Google Veo 2 (Cinematic High-Def)',
     providerId: 'google',
@@ -47,26 +83,8 @@ const DEFAULT_MODELS: ModelCapability[] = [
     supportedResolutions: ['720p', '1080p', '4k'],
     isConfigured: false,
     isSelfHosted: false,
-    pricingDescription: 'Google Cloud Vertex AI Pricing ($0.08 - $0.20 per clip)',
+    pricingDescription: 'Google Cloud Vertex AI / Gemini API',
     rateLimitDescription: 'Standard Cloud Quota (10 QPM)',
-  },
-  {
-    id: 'sora-turbo',
-    name: 'OpenAI Sora Turbo',
-    providerId: 'openai',
-    providerName: 'OpenAI',
-    supportsTextToVideo: true,
-    supportsImageToVideo: true,
-    supportsFirstLastFrame: true,
-    supportsReferenceImages: true,
-    supportsNativeAudio: false,
-    maxClipDurationSeconds: 10,
-    supportedAspectRatios: ['16:9', '9:16', '1:1'],
-    supportedResolutions: ['720p', '1080p'],
-    isConfigured: false,
-    isSelfHosted: false,
-    pricingDescription: 'OpenAI API Token & Video Compute Pricing',
-    rateLimitDescription: 'Tier 3/4 API Rate Limits',
   },
   {
     id: 'runway-gen3',
@@ -140,42 +158,6 @@ const DEFAULT_MODELS: ModelCapability[] = [
     pricingDescription: '$0 (Uses local GPU: RTX 3080/4090 or local inference)',
     rateLimitDescription: 'Hardware dependent (1 job at a time)',
   },
-  {
-    id: 'pollinations-video',
-    name: 'Pollinations AI Video (Free & Unlimited)',
-    providerId: 'pollinations',
-    providerName: 'Pollinations AI',
-    supportsTextToVideo: true,
-    supportsImageToVideo: true,
-    supportsFirstLastFrame: false,
-    supportsReferenceImages: true,
-    supportsNativeAudio: true,
-    maxClipDurationSeconds: 10,
-    supportedAspectRatios: ['16:9', '9:16', '1:1'],
-    supportedResolutions: ['720p', '1080p'],
-    isConfigured: true,
-    isSelfHosted: false,
-    pricingDescription: '$0 Free (No API Key Required)',
-    rateLimitDescription: 'Open AI Video Tier',
-  },
-  {
-    id: 'procedural-cinematic',
-    name: 'VividFlow Procedural High-Def Engine (Immediate Playable)',
-    providerId: 'procedural',
-    providerName: 'VividFlow Engine',
-    supportsTextToVideo: true,
-    supportsImageToVideo: true,
-    supportsFirstLastFrame: true,
-    supportsReferenceImages: true,
-    supportsNativeAudio: true,
-    maxClipDurationSeconds: 10,
-    supportedAspectRatios: ['16:9', '9:16', '1:1', '21:9'],
-    supportedResolutions: ['720p', '1080p'],
-    isConfigured: true,
-    isSelfHosted: true,
-    pricingDescription: 'Free & Local (Zero API keys required for development)',
-    rateLimitDescription: 'Instant generation & assembly',
-  },
 ];
 
 const DEFAULT_PROVIDERS: ProviderConfig[] = [
@@ -187,18 +169,18 @@ const DEFAULT_PROVIDERS: ProviderConfig[] = [
     models: DEFAULT_MODELS.filter((m) => m.providerId === 'pollinations'),
   },
   {
+    id: 'procedural',
+    name: 'VividFlow Built-in Engine',
+    enabled: true,
+    mode: 'self-hosted',
+    models: DEFAULT_MODELS.filter((m) => m.providerId === 'procedural'),
+  },
+  {
     id: 'google',
     name: 'Google Video AI (Veo 2 / Gemini)',
     enabled: true,
     mode: 'api',
     models: DEFAULT_MODELS.filter((m) => m.providerId === 'google'),
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI (Sora & GPT-4o Scripting)',
-    enabled: true,
-    mode: 'api',
-    models: DEFAULT_MODELS.filter((m) => m.providerId === 'openai'),
   },
   {
     id: 'runway',
@@ -229,13 +211,6 @@ const DEFAULT_PROVIDERS: ProviderConfig[] = [
     apiEndpoint: 'http://127.0.0.1:8188',
     models: DEFAULT_MODELS.filter((m) => m.providerId === 'comfyui'),
   },
-  {
-    id: 'procedural',
-    name: 'VividFlow Built-in Engine',
-    enabled: true,
-    mode: 'self-hosted',
-    models: DEFAULT_MODELS.filter((m) => m.providerId === 'procedural'),
-  },
 ];
 
 class Database {
@@ -250,9 +225,27 @@ class Database {
 
   constructor() {
     this.load();
+    this.syncEnvKeys();
     if (this.state.projects.length === 0) {
       this.seedInitialProject();
     }
+  }
+
+  private syncEnvKeys(): void {
+    this.state.providers.forEach((p) => {
+      let envKey = '';
+      if (p.id === 'google') envKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY || '';
+      else if (p.id === 'runway') envKey = process.env.RUNWAYML_API_SECRET || '';
+      else if (p.id === 'luma') envKey = process.env.LUMA_API_KEY || '';
+      else if (p.id === 'replicate') envKey = process.env.REPLICATE_API_TOKEN || '';
+
+      if (envKey && (!p.apiKey || p.apiKey.length <= 5)) {
+        p.apiKey = envKey;
+      }
+      if (p.id === 'comfyui' && process.env.COMFYUI_ENDPOINT) {
+        p.apiEndpoint = process.env.COMFYUI_ENDPOINT;
+      }
+    });
   }
 
   private load(): void {
@@ -275,6 +268,7 @@ class Database {
         console.error('Failed to parse database file, initializing clean state:', err);
       }
     }
+    this.syncEnvKeys();
   }
 
   private persist(): void {
@@ -751,16 +745,22 @@ class Database {
 
   // --- Model Providers & Settings ---
   public getProviders(): ProviderConfig[] {
+    this.syncEnvKeys();
     return this.state.providers;
   }
 
   public getModels(): ModelCapability[] {
+    this.syncEnvKeys();
     const allModels: ModelCapability[] = [];
     this.state.providers.forEach((p) => {
+      const isFreeOrSelfHosted = p.id === 'pollinations' || p.id === 'procedural' || p.mode === 'self-hosted';
+      const hasKey = Boolean(p.apiKey && p.apiKey.length > 5);
+      const isConfigured = isFreeOrSelfHosted || hasKey;
+
       p.models.forEach((m) => {
         allModels.push({
           ...m,
-          isConfigured: p.mode === 'self-hosted' || Boolean(p.apiKey && p.apiKey.length > 5),
+          isConfigured,
         });
       });
     });

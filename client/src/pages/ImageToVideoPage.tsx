@@ -30,7 +30,7 @@ export const ImageToVideoPage: React.FC<ImageToVideoPageProps> = ({
   const [duration, setDuration] = useState<number>(6);
   const [cameraMovement, setCameraMovement] = useState<CameraMovement>('pan-right');
   const [motionIntensity, setMotionIntensity] = useState<number>(6);
-  const [selectedModelId, setSelectedModelId] = useState<string>('procedural-cinematic');
+  const [selectedModelId, setSelectedModelId] = useState<string>('pollinations-video');
 
   const handleFileDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

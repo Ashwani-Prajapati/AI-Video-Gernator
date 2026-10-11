@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { api } from './api/client';
+import { api, DEFAULT_MODELS, DEFAULT_PROVIDERS } from './api/client';
 import type {
   Asset,
   GenerationJob,
@@ -25,8 +25,8 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [models, setModels] = useState<ModelCapability[]>([]);
-  const [providers, setProviders] = useState<ProviderConfig[]>([]);
+  const [models, setModels] = useState<ModelCapability[]>(DEFAULT_MODELS);
+  const [providers, setProviders] = useState<ProviderConfig[]>(DEFAULT_PROVIDERS);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [systemHealth, setSystemHealth] = useState<any>(null);
 
@@ -58,12 +58,25 @@ export function App() {
   const refreshModels = useCallback(async () => {
     try {
       const [modelsRes, settingsRes, healthRes] = await Promise.all([
-        api.getModels(),
-        api.getSettings(),
-        api.getHealth(),
+        api.getModels().catch((e) => {
+          console.warn('api.getModels() failed:', e.message);
+          return { success: false, models: DEFAULT_MODELS };
+        }),
+        api.getSettings().catch((e) => {
+          console.warn('api.getSettings() failed:', e.message);
+          return { success: false, providers: DEFAULT_PROVIDERS };
+        }),
+        api.getHealth().catch((e) => {
+          console.warn('api.getHealth() failed:', e.message);
+          return { status: 'disconnected', error: e.message };
+        }),
       ]);
-      if (modelsRes.success) setModels(modelsRes.models);
-      if (settingsRes.success) setProviders(settingsRes.providers);
+      if (modelsRes.success && Array.isArray(modelsRes.models) && modelsRes.models.length > 0) {
+        setModels(modelsRes.models);
+      }
+      if (settingsRes.success && Array.isArray(settingsRes.providers) && settingsRes.providers.length > 0) {
+        setProviders(settingsRes.providers);
+      }
       setSystemHealth(healthRes);
     } catch (err) {
       console.warn('Failed to load models/settings:', err);
