@@ -1,0 +1,53 @@
+# ====================================================================
+# VividFlow AI Studio - Git Ignore Rules
+# ====================================================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production Builds
+dist/
+dist-ssr/
+build/
+client/dist/
+server/dist/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Generated Video & Audio Outputs (Exclude heavy binaries)
+server/public/outputs/*
+!server/public/outputs/.gitkeep
+server/public/uploads/*
+!server/public/uploads/.gitkeep
+
+# Local Runtime Database (Auto-generated on startup if not present)
+server/data/*.json
+!server/data/.gitkeep
+
+# Logs & Debugging
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

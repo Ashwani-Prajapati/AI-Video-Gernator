@@ -1,0 +1,15 @@
+{
+  "name": "vividflow-studio",
+  "version": "1.0.0",
+  "description": "VividFlow AI Studio - Multi-Scene Cinematic Video Generator",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server run test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

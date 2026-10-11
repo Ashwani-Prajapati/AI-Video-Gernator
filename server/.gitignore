@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Media Outputs & Uploads (Rendered MP4s, clips, uploads)
+public/outputs/*
+!public/outputs/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Database storage
+data/*.json
+!data/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+Thumbs.db
